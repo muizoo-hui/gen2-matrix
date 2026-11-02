@@ -829,11 +829,16 @@ let modalSearchTerm = "";
 // ========== AUTO REFRESH ==========
 let autoRefreshTimer = null;
 let lastCloudUpdate = null;
+let lastLocalSaveTime = 0;
+let isSyncing = false;
 
 function startAutoRefresh() {
   if (autoRefreshTimer) clearInterval(autoRefreshTimer);
   autoRefreshTimer = setInterval(async () => {
     if (!cloudEnabled()) return;
+    // Skip auto-refresh if syncing or within 15s of a local save
+    if (isSyncing) return;
+    if (Date.now() - lastLocalSaveTime < 15000) return;
     try {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 5000);
@@ -958,10 +963,13 @@ async function loadData() {
 
 function saveData() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(PRODUCTS));
+  lastLocalSaveTime = Date.now();
   if (cloudEnabled()) syncToCloud();
 }
 
 function syncToCloud() {
+  isSyncing = true;
+  lastLocalSaveTime = Date.now();
   showSyncStatus("同步中...", "syncing");
   const content = btoa(unescape(encodeURIComponent(JSON.stringify(PRODUCTS))));
   const apiUrl = cloudApiUrl();
@@ -986,8 +994,9 @@ function syncToCloud() {
         })
       });
     })
-    .then(() => showSyncStatus("☁ 已同步", "synced"))
+    .then(() => { isSyncing = false; showSyncStatus("☁ 已同步", "synced"); })
     .catch(err => {
+      isSyncing = false;
       console.log("Cloud sync failed:", err);
       showSyncStatus("同步失败", "error");
     });
