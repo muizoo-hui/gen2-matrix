@@ -1159,7 +1159,7 @@ function buildMatrix() {
         html += `<div class="status-dots">${dots}</div>`;
         html += '</td>';
       } else {
-        html += `<td class="matrix-cell empty" onclick="openAddFormAt('${escapeAttr(lens)}','${escapeAttr(sf)}')" style="cursor:pointer" title="点击添加产品"><div style="font-size:18px;color:var(--muted);opacity:0.5">+</div></td>`;
+        html += '<td class="matrix-cell empty"></td>';
       }
     });
     html += '</tr>';
@@ -1345,36 +1345,6 @@ function openAddForm() {
       html += `<textarea id="field_${f.col}" placeholder="${escapeHtml(f.name)}" rows="3" style="resize:vertical;min-height:60px"></textarea>`;
     } else {
       html += `<input type="text" id="field_${f.col}" placeholder="${escapeHtml(f.name)}">`;
-    }
-    html += `</div>`;
-  });
-  body.innerHTML = html;
-  document.getElementById("formOverlay").classList.add("active");
-}
-
-function openAddFormAt(lens, sensorFam) {
-  editingIndex = -1;
-  document.getElementById("formTitle").textContent = `添加新产品 (${lens} × ${sensorFam})`;
-  const body = document.getElementById("formBody");
-  let html = "";
-  FIELD_DEFS.forEach(f => {
-    const cls = f.full ? "form-field full" : "form-field";
-    const req = f.required ? '<span class="req">*</span>' : '';
-    // Pre-fill Lens and Sensor fields
-    let prefill = "";
-    if (f.col === COL.lens) prefill = lens;
-    if (f.col === COL.sensor) prefill = sensorFam;
-    html += `<div class="${cls}"><label>${f.name} ${req}</label>`;
-    if (f.type === "select") {
-      html += `<select id="field_${f.col}" onchange="toggleCustomInput(${f.col})">`;
-      f.options.forEach(o => { html += `<option value="${escapeAttr(o)}">${escapeHtml(o || "(空)")}</option>`; });
-      html += `<option value="__custom__">自定义...</option>`;
-      html += `</select>`;
-      html += `<input type="text" id="custom_${f.col}" placeholder="输入自定义值（选自定义时启用）" style="display:none;margin-top:6px">`;
-    } else if (f.name === "备注") {
-      html += `<textarea id="field_${f.col}" placeholder="${escapeHtml(f.name)}" rows="3" style="resize:vertical;min-height:60px">${escapeHtml(prefill)}</textarea>`;
-    } else {
-      html += `<input type="text" id="field_${f.col}" value="${escapeAttr(prefill)}" placeholder="${escapeHtml(f.name)}">`;
     }
     html += `</div>`;
   });
