@@ -1189,18 +1189,16 @@ function openStatModal(filterVal, isType) {
 const modalHeaders = ["产品类型","封装","接口","目标终端","GPIO","FOV","Serdes","尺寸","连接器","项目代号","产品状态","规格书","PMIC","操作"];
 const modalCols = [COL.type, COL.pkg, COL.iface, COL.terminal, COL.gpio, COL.fov, COL.serdes, COL.size, COL.conn, COL.code, COL.status, COL.spec, COL.pmic];
 
-function renderModalTable(items, groupBy) {
+function renderModalTable(items, groupBy, showSearch) {
   modalItems = items;
   modalGroupBy = groupBy;
   modalSearchTerm = "";
   // Show search box and set width based on title
   const searchEl = document.getElementById("modalSearch");
   if (searchEl) {
-    searchEl.style.display = "flex";
+    searchEl.style.display = showSearch ? "flex" : "none";
     const input = document.getElementById("modalSearchInput");
-    if (input) input.value = "";
-    // All modal search boxes use the same width
-    input.style.width = "950px";
+    if (input) { input.value = ""; input.style.width = "950px"; }
   }
   renderModalContent();
 }
