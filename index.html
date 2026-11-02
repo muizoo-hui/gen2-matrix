@@ -1199,13 +1199,8 @@ function renderModalTable(items, groupBy) {
     searchEl.style.display = "flex";
     const input = document.getElementById("modalSearchInput");
     if (input) input.value = "";
-    // Set width based on modal title content
-    const titleText = document.getElementById("modalTitle").textContent || "";
-    let w = 800;
-    if (titleText.includes("全部产品")) w = 950;
-    else if (titleText.includes("已出样") || titleText.includes("待出样") || titleText.includes("前视")) w = 900;
-    else if (titleText.includes("待设计") || titleText.includes("周视")) w = 770;
-    input.style.width = w + "px";
+    // All modal search boxes use the same width
+    input.style.width = "950px";
   }
   renderModalContent();
 }
