@@ -584,7 +584,7 @@ body {
   gap: 8px;
 }
 .modal-search input {
-  width: 200px;
+  width: 280px;
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 6px;
@@ -597,21 +597,6 @@ body {
 }
 .modal-search input:focus { border-color: var(--primary); opacity: 1; }
 .modal-search input::placeholder { color: var(--muted); }
-/* Sortable headers */
-.modal-table th.sortable {
-  cursor: pointer;
-  user-select: none;
-  position: relative;
-}
-.modal-table th.sortable:hover { color: var(--primary); }
-.modal-table th.sortable::after {
-  content: '⇅';
-  font-size: 10px;
-  margin-left: 4px;
-  opacity: 0.4;
-}
-.modal-table th.sort-desc::after { content: '↓'; opacity: 1; color: var(--primary); }
-.modal-table th.sort-asc::after { content: '↑'; opacity: 1; color: var(--primary); }
 /* Last update time */
 .last-update {
   font-size: 11px;
@@ -805,8 +790,6 @@ const STORAGE_KEY = "gen2_matrix_products";
 let modalItems = [];
 let modalGroupBy = "sensor";
 let modalSearchTerm = "";
-let modalSortCol = -1;
-let modalSortDir = 0; // 0=none, 1=asc, -1=desc
 
 // ========== AUTO REFRESH ==========
 let autoRefreshTimer = null;
@@ -1206,8 +1189,6 @@ function renderModalTable(items, groupBy) {
   modalItems = items;
   modalGroupBy = groupBy;
   modalSearchTerm = "";
-  modalSortCol = -1;
-  modalSortDir = 0;
   // Show search box
   const searchEl = document.getElementById("modalSearch");
   if (searchEl) {
@@ -1225,29 +1206,9 @@ function renderModalContent() {
     const term = modalSearchTerm.toLowerCase();
     items = items.filter(p => p.row.some(c => String(c).toLowerCase().includes(term)));
   }
-  // Apply sort
-  if (modalSortCol >= 0 && modalSortDir !== 0) {
-    items.sort((a, b) => {
-      let va = (a.row[modalSortCol] || "").toString();
-      let vb = (b.row[modalSortCol] || "").toString();
-      if (va < vb) return modalSortDir;
-      if (va > vb) return -modalSortDir;
-      return 0;
-    });
-  }
 
   let html = '<table class="modal-table"><thead><tr>';
-  modalHeaders.forEach((h, i) => {
-    if (i < modalCols.length) {
-      let cls = "sortable";
-      if (modalSortCol === modalCols[i]) {
-        cls += modalSortDir === 1 ? " sort-asc" : (modalSortDir === -1 ? " sort-desc" : "");
-      }
-      html += `<th class="${cls}" onclick="toggleModalSort(${modalCols[i]})">${escapeHtml(h)}</th>`;
-    } else {
-      html += `<th>${escapeHtml(h)}</th>`;
-    }
-  });
+  modalHeaders.forEach(h => { html += `<th>${escapeHtml(h)}</th>`; });
   html += '</tr></thead><tbody>';
 
   let groupCol, groupLabel;
@@ -1255,9 +1216,15 @@ function renderModalContent() {
   else if (modalGroupBy === "gpio") { groupCol = COL.gpio; groupLabel = "GPIO"; }
   else { groupCol = COL.sensor; groupLabel = "Sensor"; }
 
-  // If sorted, skip grouping
-  if (modalSortCol >= 0 && modalSortDir !== 0) {
-    items.forEach(p => {
+  const groups = {};
+  items.forEach(p => {
+    const gk = p.row[groupCol] || "(未指定)";
+    if (!groups[gk]) groups[gk] = [];
+    groups[gk].push(p);
+  });
+  Object.keys(groups).sort().forEach(gk => {
+    html += `<tr class="group-row"><td colspan="${modalHeaders.length}">${groupLabel}: ${escapeHtml(gk)} （${groups[gk].length}款）</td></tr>`;
+    groups[gk].forEach(p => {
       html += '<tr>';
       modalCols.forEach(colIdx => {
         const isStatus = colIdx === COL.status;
@@ -1269,29 +1236,7 @@ function renderModalContent() {
       html += `</div></td>`;
       html += '</tr>';
     });
-  } else {
-    const groups = {};
-    items.forEach(p => {
-      const gk = p.row[groupCol] || "(未指定)";
-      if (!groups[gk]) groups[gk] = [];
-      groups[gk].push(p);
-    });
-    Object.keys(groups).sort().forEach(gk => {
-      html += `<tr class="group-row"><td colspan="${modalHeaders.length}">${groupLabel}: ${escapeHtml(gk)} （${groups[gk].length}款）</td></tr>`;
-      groups[gk].forEach(p => {
-        html += '<tr>';
-        modalCols.forEach(colIdx => {
-          const isStatus = colIdx === COL.status;
-          html += `<td>${cellHtml(p.row[colIdx], isStatus)}</td>`;
-        });
-        html += `<td><div class="row-actions">`;
-        html += `<button class="row-btn" onclick="openEditForm(${p.index})">编辑</button>`;
-        html += `<button class="row-btn danger" onclick="deleteProduct(${p.index})">删除</button>`;
-        html += `</div></td>`;
-        html += '</tr>';
-      });
-    });
-  }
+  });
 
   html += '</tbody></table>';
   document.getElementById("modalBody").innerHTML = html;
@@ -1301,16 +1246,6 @@ function filterModalItems() {
   const input = document.getElementById("modalSearchInput");
   if (!input) return;
   modalSearchTerm = input.value.trim();
-  renderModalContent();
-}
-
-function toggleModalSort(colIdx) {
-  if (modalSortCol === colIdx) {
-    modalSortDir = modalSortDir === 1 ? -1 : (modalSortDir === -1 ? 0 : 1);
-  } else {
-    modalSortCol = colIdx;
-    modalSortDir = 1;
-  }
   renderModalContent();
 }
 
