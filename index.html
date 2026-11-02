@@ -577,23 +577,26 @@ body {
   white-space: nowrap;
 }
 .undo-toast button:hover { opacity: 0.9; }
-/* Modal search */
+/* Modal search (inline in header) */
 .modal-search {
-  padding: 12px 24px;
-  border-bottom: 1px solid var(--border);
-  background: var(--surface-2);
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 .modal-search input {
-  width: 100%;
+  width: 200px;
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 6px;
-  padding: 6px 12px;
+  padding: 5px 12px;
   font-size: 13px;
   font-family: inherit;
   outline: none;
+  opacity: 0.7;
+  transition: opacity 0.2s;
 }
-.modal-search input:focus { border-color: var(--primary); }
+.modal-search input:focus { border-color: var(--primary); opacity: 1; }
+.modal-search input::placeholder { color: var(--muted); }
 /* Sortable headers */
 .modal-table th.sortable {
   cursor: pointer;
@@ -703,9 +706,9 @@ body {
   <div class="modal" onclick="event.stopPropagation()">
     <div class="modal-header">
       <div class="modal-title" id="modalTitle"></div>
+      <div class="modal-search" id="modalSearch" style="display:none"><input type="text" id="modalSearchInput" placeholder="搜索产品..." oninput="filterModalItems()"></div>
       <button class="modal-close" onclick="closeModal()">✕</button>
     </div>
-    <div class="modal-search" id="modalSearch" style="display:none"><input type="text" id="modalSearchInput" placeholder="搜索产品..." oninput="filterModalItems()"></div>
     <div class="modal-body" id="modalBody"></div>
   </div>
 </div>
