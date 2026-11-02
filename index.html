@@ -653,6 +653,22 @@ body {
   padding: 0 1px;
 }
 
+.remark-row td {
+  background: var(--surface-2);
+  padding: 6px 16px;
+  font-size: 12px;
+  color: var(--text-2);
+  border-top: none;
+  line-height: 1.5;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+.remark-row td .remark-label {
+  color: var(--muted);
+  font-weight: 600;
+  margin-right: 6px;
+}
+
 </style>
 </head>
 <body>
@@ -1208,8 +1224,8 @@ function openStatModal(filterVal, isType) {
 }
 
 // ========== RENDER MODAL TABLE (with search + sort) ==========
-const modalHeaders = ["产品类型","封装","接口","目标终端","GPIO","FOV","Serdes","尺寸","连接器","项目代号","产品状态","规格书","PMIC","备注","操作"];
-const modalCols = [COL.type, COL.pkg, COL.iface, COL.terminal, COL.gpio, COL.fov, COL.serdes, COL.size, COL.conn, COL.code, COL.status, COL.spec, COL.pmic, COL.remark];
+const modalHeaders = ["产品类型","封装","接口","目标终端","GPIO","FOV","Serdes","尺寸","连接器","项目代号","产品状态","规格书","PMIC","操作"];
+const modalCols = [COL.type, COL.pkg, COL.iface, COL.terminal, COL.gpio, COL.fov, COL.serdes, COL.size, COL.conn, COL.code, COL.status, COL.spec, COL.pmic];
 
 function renderModalTable(items, groupBy, showSearch) {
   modalItems = items;
@@ -1272,6 +1288,11 @@ function renderModalContent() {
       html += `<button class="row-btn danger" onclick="deleteProduct(${p.index})">删除</button>`;
       html += `</div></td>`;
       html += '</tr>';
+      // Show remark as full-width row below if exists
+      const remark = p.row[COL.remark];
+      if (remark && remark.trim()) {
+        html += `<tr class="remark-row"><td colspan="${modalHeaders.length}"><span class="remark-label">备注:</span>${highlightText(remark, modalSearchTerm)}</td></tr>`;
+      }
     });
   });
 
