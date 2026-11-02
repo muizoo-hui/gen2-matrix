@@ -638,6 +638,13 @@ body {
   .form-field.full { grid-column: 1; }
   .export-menu { right: -40px; }
 }
+.search-hl {
+  background: #fff3a0;
+  color: var(--text);
+  border-radius: 2px;
+  padding: 0 1px;
+}
+
 </style>
 </head>
 <body>
@@ -1000,6 +1007,13 @@ function escapeHtml(str) {
   if (!str) return "";
   return String(str).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
 }
+function highlightText(str, term) {
+  if (!str || !term) return escapeHtml(str);
+  const escaped = escapeHtml(str);
+  const escapedTerm = escapeHtml(term).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const regex = new RegExp('(' + escapedTerm + ')', 'gi');
+  return escaped.replace(regex, '<span class="search-hl">$1</span>');
+}
 function escapeAttr(str) {
   return String(str).replace(/'/g,"\\'").replace(/"/g,"&quot;");
 }
@@ -1227,12 +1241,23 @@ function renderModalContent() {
     groups[gk].push(p);
   });
   Object.keys(groups).sort().forEach(gk => {
-    html += `<tr class="group-row"><td colspan="${modalHeaders.length}">${groupLabel}: ${escapeHtml(gk)} （${groups[gk].length}款）</td></tr>`;
+    html += `<tr class="group-row"><td colspan="${modalHeaders.length}">${groupLabel}: ${highlightText(gk, modalSearchTerm)} （${groups[gk].length}款）</td></tr>`;
     groups[gk].forEach(p => {
       html += '<tr>';
       modalCols.forEach(colIdx => {
         const isStatus = colIdx === COL.status;
-        html += `<td>${cellHtml(p.row[colIdx], isStatus)}</td>`;
+        const val = p.row[colIdx];
+        if (modalSearchTerm && val && val !== "/" && val !== "") {
+          if (isStatus) {
+            const cls = getBadgeClass(val);
+            if (cls) html += `<td><span class="badge ${cls}">${highlightText(val, modalSearchTerm)}</span></td>`;
+            else html += `<td>${highlightText(val, modalSearchTerm)}</td>`;
+          } else {
+            html += `<td>${highlightText(val, modalSearchTerm)}</td>`;
+          }
+        } else {
+          html += `<td>${cellHtml(val, isStatus)}</td>`;
+        }
       });
       html += `<td><div class="row-actions">`;
       html += `<button class="row-btn" onclick="openEditForm(${p.index})">编辑</button>`;
