@@ -833,29 +833,8 @@ let lastLocalSaveTime = 0;
 let isSyncing = false;
 
 function startAutoRefresh() {
-  if (autoRefreshTimer) clearInterval(autoRefreshTimer);
-  autoRefreshTimer = setInterval(async () => {
-    if (!cloudEnabled()) return;
-    // Skip auto-refresh if syncing or within 15s of a local save
-    if (isSyncing) return;
-    if (Date.now() - lastLocalSaveTime < 15000) return;
-    try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 5000);
-      const resp = await fetch(cloudRawUrl() + "?t=" + Date.now(), { signal: controller.signal });
-      clearTimeout(timeoutId);
-      if (!resp.ok) return;
-      const data = await resp.json();
-      if (Array.isArray(data) && data.length > 0 && JSON.stringify(data) !== JSON.stringify(PRODUCTS)) {
-        PRODUCTS = data;
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(PRODUCTS));
-        renderStats();
-        buildMatrix();
-        showSyncStatus("☁ 已同步", "synced");
-        updateLastUpdateTime();
-      }
-    } catch(e) { /* silent fail */ }
-  }, 30000);
+  // Auto-refresh removed to prevent overwriting local edits
+  // Users can manually refresh with the 🔄 button
 }
 
 function updateLastUpdateTime() {
@@ -1751,7 +1730,6 @@ loadData().then(() => {
   renderStats();
   buildMatrix();
   setTimeout(setupStickyPositions, 0);
-  startAutoRefresh();
 });
 window.addEventListener('resize', setupStickyPositions);
 </script>
