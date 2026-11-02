@@ -1204,8 +1204,7 @@ function renderModalTable(items, groupBy) {
     let w = 800;
     if (titleText.includes("全部产品")) w = 950;
     else if (titleText.includes("已出样") || titleText.includes("待出样") || titleText.includes("前视")) w = 900;
-    else if (titleText.includes("待设计")) w = 750;
-    else if (titleText.includes("周视")) w = 770;
+    else if (titleText.includes("待设计") || titleText.includes("周视")) w = 770;
     input.style.width = w + "px";
   }
   renderModalContent();
