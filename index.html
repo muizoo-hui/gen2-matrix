@@ -1199,9 +1199,13 @@ function renderModalTable(items, groupBy) {
     searchEl.style.display = "flex";
     const input = document.getElementById("modalSearchInput");
     if (input) input.value = "";
-    // Set width: 950px for "全部产品" modal, 800px for others
+    // Set width based on modal title content
     const titleText = document.getElementById("modalTitle").textContent || "";
-    input.style.width = titleText.includes("全部产品") ? "950px" : "800px";
+    let w = 800;
+    if (titleText.includes("全部产品")) w = 950;
+    else if (titleText.includes("已出样") || titleText.includes("待出样") || titleText.includes("前视")) w = 900;
+    else if (titleText.includes("待设计") || titleText.includes("周视")) w = 770;
+    input.style.width = w + "px";
   }
   renderModalContent();
 }
