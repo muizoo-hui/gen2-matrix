@@ -586,11 +586,9 @@ body {
   display: flex;
   align-items: center;
   gap: 8px;
-  flex: 1;
-  max-width: 950px;
 }
 .modal-search input {
-  flex: 1; max-width: 950px; min-width: 200px;
+  min-width: 200px;
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 6px;
@@ -1195,12 +1193,15 @@ function renderModalTable(items, groupBy) {
   modalItems = items;
   modalGroupBy = groupBy;
   modalSearchTerm = "";
-  // Show search box
+  // Show search box and set width based on title
   const searchEl = document.getElementById("modalSearch");
   if (searchEl) {
-    searchEl.style.display = "block";
+    searchEl.style.display = "flex";
     const input = document.getElementById("modalSearchInput");
     if (input) input.value = "";
+    // Set width: 950px for "全部产品" modal, 800px for others
+    const titleText = document.getElementById("modalTitle").textContent || "";
+    input.style.width = titleText.includes("全部产品") ? "950px" : "800px";
   }
   renderModalContent();
 }
