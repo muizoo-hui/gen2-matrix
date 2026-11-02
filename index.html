@@ -722,7 +722,12 @@ function cloudEnabled() {
   return !!(CLOUD_CONFIG.owner && CLOUD_CONFIG.repo && getGitHubToken());
 }
 function cloudRawUrl() {
-  return `https://raw.githubusercontent.com/${CLOUD_CONFIG.owner}/${CLOUD_CONFIG.repo}/${CLOUD_CONFIG.branch}/${CLOUD_CONFIG.path}`;
+  // 托管在 GitHub Pages 时用同目录相对路径（更快、无 CORS 问题）
+  // 本地打开时用 raw.githubusercontent.com
+  if (location.protocol === "file:") {
+    return `https://raw.githubusercontent.com/${CLOUD_CONFIG.owner}/${CLOUD_CONFIG.repo}/${CLOUD_CONFIG.branch}/${CLOUD_CONFIG.path}`;
+  }
+  return `./${CLOUD_CONFIG.path}`;
 }
 function cloudApiUrl() {
   return `https://api.github.com/repos/${CLOUD_CONFIG.owner}/${CLOUD_CONFIG.repo}/contents/${CLOUD_CONFIG.path}`;
@@ -743,7 +748,10 @@ async function loadData() {
   if (cloudEnabled()) {
     showSyncStatus("加载中...", "syncing");
     try {
-      const resp = await fetch(cloudRawUrl() + "?t=" + Date.now());
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 8000);
+      const resp = await fetch(cloudRawUrl() + "?t=" + Date.now(), { signal: controller.signal });
+      clearTimeout(timeoutId);
       if (!resp.ok) throw new Error("HTTP " + resp.status);
       const data = await resp.json();
       if (Array.isArray(data) && data.length > 0 && Array.isArray(data[0]) && data[0].length >= 16) {
