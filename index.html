@@ -331,11 +331,14 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 16px;
 }
 .modal-title {
   font-size: 18px;
   font-weight: 700;
   color: var(--text);
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 .modal-title .sensor-name { color: var(--primary); }
 .modal-title .chip-name { color: var(--accent); }
@@ -344,6 +347,7 @@ body {
 .modal-close {
   background: var(--surface-3);
   border: none;
+  flex-shrink: 0;
   border-radius: 8px;
   width: 32px; height: 32px;
   color: var(--muted);
@@ -582,9 +586,11 @@ body {
   display: flex;
   align-items: center;
   gap: 8px;
+  flex: 1;
+  max-width: 950px;
 }
 .modal-search input {
-  width: 950px;
+  flex: 1; max-width: 950px; min-width: 200px;
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 6px;
