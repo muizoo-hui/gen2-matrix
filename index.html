@@ -463,7 +463,8 @@ body {
   color: var(--text-2);
 }
 .form-field label .req { color: var(--red); }
-.form-field input, .form-field select {
+.form-field input, .form-field select, .form-field textarea {
+
   background: var(--surface-2);
   border: 1px solid var(--border);
   border-radius: 6px;
@@ -474,7 +475,14 @@ body {
   outline: none;
   transition: border-color 0.2s;
 }
-.form-field input:focus, .form-field select:focus { border-color: var(--primary); }
+.form-field input:focus, .form-field select:focus, .form-field textarea:focus { border-color: var(--primary); }
+.form-field textarea {
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  white-space: pre-wrap;
+  font-family: inherit;
+  line-height: 1.5;
+}
 .form-footer {
   padding: 16px 24px;
   background: var(--surface-2);
@@ -1200,8 +1208,8 @@ function openStatModal(filterVal, isType) {
 }
 
 // ========== RENDER MODAL TABLE (with search + sort) ==========
-const modalHeaders = ["产品类型","封装","接口","目标终端","GPIO","FOV","Serdes","尺寸","连接器","项目代号","产品状态","规格书","PMIC","操作"];
-const modalCols = [COL.type, COL.pkg, COL.iface, COL.terminal, COL.gpio, COL.fov, COL.serdes, COL.size, COL.conn, COL.code, COL.status, COL.spec, COL.pmic];
+const modalHeaders = ["产品类型","封装","接口","目标终端","GPIO","FOV","Serdes","尺寸","连接器","项目代号","产品状态","规格书","PMIC","备注","操作"];
+const modalCols = [COL.type, COL.pkg, COL.iface, COL.terminal, COL.gpio, COL.fov, COL.serdes, COL.size, COL.conn, COL.code, COL.status, COL.spec, COL.pmic, COL.remark];
 
 function renderModalTable(items, groupBy, showSearch) {
   modalItems = items;
@@ -1326,6 +1334,8 @@ function openAddForm() {
       html += `<option value="__custom__">自定义...</option>`;
       html += `</select>`;
       html += `<input type="text" id="custom_${f.col}" placeholder="输入自定义值（选自定义时启用）" style="display:none;margin-top:6px">`;
+    } else if (f.name === "备注") {
+      html += `<textarea id="field_${f.col}" placeholder="${escapeHtml(f.name)}" rows="3" style="resize:vertical;min-height:60px"></textarea>`;
     } else {
       html += `<input type="text" id="field_${f.col}" placeholder="${escapeHtml(f.name)}">`;
     }
@@ -1358,6 +1368,8 @@ function openEditForm(idx) {
       html += `<option value="__custom__" ${isCustom ? "selected" : ""}>自定义...</option>`;
       html += `</select>`;
       html += `<input type="text" id="custom_${f.col}" value="${isCustom ? escapeAttr(val) : ""}" placeholder="输入自定义值（选自定义时启用）" style="display:${isCustom ? "block" : "none"};margin-top:6px">`;
+    } else if (f.name === "备注") {
+      html += `<textarea id="field_${f.col}" placeholder="${escapeHtml(f.name)}" rows="3" style="resize:vertical;min-height:60px">${escapeHtml(val)}</textarea>`;
     } else {
       html += `<input type="text" id="field_${f.col}" value="${escapeAttr(val)}" placeholder="${escapeHtml(f.name)}">`;
     }
